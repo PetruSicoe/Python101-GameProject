@@ -12,6 +12,10 @@ pygame.font.init()
 MENU_WIDTH = 1000
 MENU_HEIGHT = 1000
 
+GUESS_WIDTH = 1000
+GUESS_HEIGHT = 650
+
+
 HANGMAN_WIDTH = 1300
 HANGMAN_HEIGHT = 720
 
@@ -21,10 +25,11 @@ RED = (255,0,0)
 GREEN = (0,255,0)
 BLUE = (0,0,255)
 COPPER = (72, 45, 20)
+LIGHT_YELLOW = (255, 255, 102)
 
 frame_rate = pygame.time.Clock()
 back_ground = pygame.image.load("image_kids.jpg")
-
+back_ground_guess = pygame.image.load("schoolboard.jpg")
 
 
 
@@ -93,7 +98,7 @@ class Menu(GameObject):
                     sys.exit()
                 elif self.left_guess <= mouse[0] <= self.left_guess + self.width_guess and self.top_guess <= mouse[1] <= self.top_guess + self.heigth_guess:
                     print("hello guess")
-                    guess = Guess()
+                    guess = GuessTheNumber()
                     guess.run()
                     pygeme.quit()
                     sys.exit()
@@ -416,6 +421,262 @@ class Hangman(GameObject):
             self.input()
             self.update()
             self.draw()
+
+class GuessTheNumber(GameObject):
+    def __init__(self):
+        self.window = pygame.display.set_mode((GUESS_WIDTH, GUESS_HEIGHT))
+        pygame.display.set_caption('Guess the Number')
+
+        self.index = 0
+        self.lives = 2
+        
+        self.winner_text = ''
+        self.losing_text = ''
+
+        #fonturi
+        self.intro_font = pygame.font.SysFont('Comic Sans MS', 50)
+        self.number_font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.lives_font = pygame.font.SysFont('Comic Sans MS', 20)
+        self.message_font = pygame.font.SysFont('Comic Sans MS', 40)
+
+        #culori
+        self.card_color = (194, 175, 161)
+        self.card_hover = (175, 122, 90)
+
+        self.choice = -1
+        #init cartonasele
+        #1
+        self.left_card_one = GUESS_WIDTH / 4 + 70
+        self.top_card_one = GUESS_HEIGHT / 3
+        self.width_card_one = 100
+        self.height_card_one = 70
+
+        self.card_one_rect = pygame.Rect(self.left_card_one, self.top_card_one, self.width_card_one, self.height_card_one)
+
+        self.rand_1 = randrange(5)
+        #2
+        self.left_card_two = GUESS_WIDTH / 4 + 320
+        self.top_card_two = GUESS_HEIGHT / 3
+        self.width_card_two = 100
+        self.height_card_two = 70
+
+        self.card_two_rect = pygame.Rect(self.left_card_two, self.top_card_two, self.width_card_two, self.height_card_two)
+
+        self.rand_2 = randrange(6, 10)
+        #3
+        self.left_card_three = GUESS_WIDTH / 4 + 70
+        self.top_card_three = GUESS_HEIGHT / 3 + 170
+        self.width_card_three = 100
+        self.height_card_three = 70
+
+        self.card_three_rect = pygame.Rect(self.left_card_three, self.top_card_three, self.width_card_three, self.height_card_three)
+
+        self.rand_3 = randrange(25, 35)
+        #4
+        self.left_card_four = GUESS_WIDTH / 4 + 320
+        self.top_card_four = GUESS_HEIGHT / 3 + 170
+        self.width_card_four = 100
+        self.height_card_four = 70
+
+        self.card_four_rect = pygame.Rect(self.left_card_four, self.top_card_four, self.width_card_four, self.height_card_four)
+
+        self.rand_4 = randrange(10, 20)
+
+        #pun toate randomurile intr-o lista
+        self.randoms_list = ['button_1', 'button_2', 'button_3', 'button_4']
+        self.to_guess = random.choice(self.randoms_list)
+
+        #butoane final
+        #REPLAY
+        self.left_replay = GUESS_WIDTH - 150
+        self.top_replay = GUESS_HEIGHT / 2 - 80
+        self.width_replay = 60
+        self.height_replay = 45
+
+        self.replay_rect = pygame.Rect(self.left_replay, self.top_replay, self.width_replay, self.height_replay)
+
+        #MENU
+        self.left_menu = GUESS_WIDTH - 150
+        self.top_menu = GUESS_HEIGHT / 2
+        self.width_menu = 60
+        self.height_menu = 45
+
+        self.menu_rect = pygame.Rect(self.left_menu, self.top_menu, self.width_menu, self.height_menu)
+
+        self.timer_index = 0
+
+        
+
+
+    def input(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit
+            
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                
+                #verific pe ce cartonas a dat click jucatorul/daca click MENU/REPLAY
+                if self.card_one_rect.collidepoint(event.pos):
+                    if self.randoms_list[0] == self.to_guess:
+                        self.choice = 1
+                    else:
+                        self.choice = 0
+                        self.lives -= 1
+                elif self.card_two_rect.collidepoint(event.pos):
+                    if self.randoms_list[1] == self.to_guess:
+                        self.choice = 1
+                    else:
+                        self.choice = 0
+                        self.lives -= 1
+                elif self.card_three_rect.collidepoint(event.pos):
+                    if self.randoms_list[2] == self.to_guess:
+                        self.choice = 1
+                    else:
+                        self.choice = 0
+                        self.lives -= 1
+                elif self.card_four_rect.collidepoint(event.pos):
+                    if self.randoms_list[3] == self.to_guess:
+                        self.choice = 1
+                    else:
+                        self.choice = 0
+                        self.lives -= 1
+                elif self.menu_rect.collidepoint(event.pos):
+                    menu = Menu()
+                    menu.run()
+                    pygame.quit()
+                    sys.exit()
+                elif self.replay_rect.collidepoint(event.pos):
+                    guess = GuessTheNumber()
+                    guess.run()
+                    pygame.quit()
+                    sys.exit()
+                    
+    
+    
+    def update(self):
+        pass
+
+    def draw(self):
+
+        image_rect = back_ground_guess.get_rect()
+        self.window.fill(BLACK)
+        self.window.blit(back_ground_guess, image_rect)
+        
+        #afisez titlul
+        welcome_text = self.intro_font.render('Welcome to GuessTheNumber!', True, WHITE)
+        self.window.blit(welcome_text, (150, 25))
+
+        #afisez numarul de vieti
+        lives_text = self.lives_font.render(f'lives: {self.lives}', True, LIGHT_YELLOW)
+        self.window.blit(lives_text, (680, 150))
+
+        mouse = pygame.mouse.get_pos()
+
+        #afisez cartonasele
+        #1
+        if self.left_card_one <= mouse[0] <= self.left_card_one + self.width_card_one and self.top_card_one <= mouse[1] <= self.top_card_one + self.height_card_one:
+            pygame.draw.rect(self.window, self.card_hover, self.card_one_rect)
+        else:
+            pygame.draw.rect(self.window, self.card_color, self.card_one_rect)
+        
+        self.button_1 = self.number_font.render(str(self.rand_1), True, BLACK)
+        self.window.blit(self.button_1, (self.card_one_rect.x + 40, self.card_one_rect.y + 10))
+
+        #2
+        if self.left_card_two <= mouse[0] <= self.left_card_two + self.width_card_two and self.top_card_two <= mouse[1] <= self.top_card_two + self.height_card_two:
+            pygame.draw.rect(self.window, self.card_hover, self.card_two_rect)
+        else:
+            pygame.draw.rect(self.window, self.card_color, self.card_two_rect)
+
+        self.button_2 = self.number_font.render(str(self.rand_2), True, BLACK)
+        self.window.blit(self.button_2, (self.card_two_rect.x + 40, self.card_two_rect.y + 10))
+
+        #3
+        if self.left_card_three <= mouse[0] <= self.left_card_three + self.width_card_three and self.top_card_three <= mouse[1] <= self.top_card_three + self.height_card_three:
+            pygame.draw.rect(self.window, self.card_hover, self.card_three_rect)
+        else:
+            pygame.draw.rect(self.window, self.card_color, self.card_three_rect)
+        
+        self.button_3 = self.number_font.render(str(self.rand_3), True, BLACK)
+        self.window.blit(self.button_3, (self.card_three_rect.x + 40, self.card_three_rect.y + 10))
+
+        #4
+        if self.left_card_four <= mouse[0] <= self.left_card_four + self.width_card_four and self.top_card_four <= mouse[1] <= self.top_card_four + self.height_card_four:
+            pygame.draw.rect(self.window, self.card_hover, self.card_four_rect)
+        else:
+            pygame.draw.rect(self.window, self.card_color, self.card_four_rect)
+
+        self.button_4 = self.number_font.render(str(self.rand_4), True, BLACK)
+        self.window.blit(self.button_4, (self.card_four_rect.x + 40, self.card_four_rect.y + 10))
+
+        if self.choice == 1:
+            self.winner_text = self.message_font.render('Wow, you won!', True, LIGHT_YELLOW)
+            self.window.blit(self.winner_text, (400, 300))
+
+            #buton replay
+            if self.left_replay <= mouse[0] <= self.left_replay + self.width_replay and self.top_replay <= mouse[1] <= self.top_replay + self.height_replay:
+                pygame.draw.rect(self.window, self.card_hover, self.replay_rect)
+            else:
+                pygame.draw.rect(self.window, self.card_color, self.replay_rect)
+
+            self.replay_b = self.lives_font.render('Replay', True, BLACK)
+            self.window.blit(self.replay_b, (self.replay_rect.x + 1, self.replay_rect.y + 10))
+
+
+            #buton MENU
+
+            if self.left_menu <= mouse[0] <= self.left_menu + self.width_menu and self.top_menu <= mouse[1] <= self.top_menu + self.height_menu:
+                pygame.draw.rect(self.window, self.card_hover, self.menu_rect)
+            else:
+                pygame.draw.rect(self.window, self.card_color, self.menu_rect)
+
+            self.menu_b = self.lives_font.render('Menu', True, BLACK)
+            self.window.blit(self.menu_b, (self.menu_rect.x + 1, self.menu_rect.y + 10))
+
+
+        elif self.choice == 0:
+            mouse = pygame.mouse.get_pos()
+            if self.lives == 1:
+                if self.timer_index < 1:
+                    self.losing_text = self.message_font.render('Oopsey, only one life left!', True, LIGHT_YELLOW)
+                    self.window.blit(self.losing_text, (300, 300))
+                    self.timer_index+=0.01
+            elif self.lives == 0:
+                self.losing_text = self.message_font.render('Game over ya loser', True, LIGHT_YELLOW)
+                self.window.blit(self.losing_text, (350, 300))
+                #buton replay
+
+                if self.left_replay <= mouse[0] <= self.left_replay + self.width_replay and self.top_replay <= mouse[1] <= self.top_replay + self.height_replay:
+                    pygame.draw.rect(self.window, self.card_hover, self.replay_rect)
+                else:
+                    pygame.draw.rect(self.window, self.card_color, self.replay_rect)
+
+                self.replay_b = self.lives_font.render('Replay', True, BLACK)
+                self.window.blit(self.replay_b, (self.replay_rect.x + 1, self.replay_rect.y + 10))
+
+                #buton MENU
+
+                if self.left_menu <= mouse[0] <= self.left_menu + self.width_menu and self.top_menu <= mouse[1] <= self.top_menu + self.height_menu:
+                    pygame.draw.rect(self.window, self.card_hover, self.menu_rect)
+                else:
+                    pygame.draw.rect(self.window, self.card_color, self.menu_rect)
+
+                self.menu_b = self.lives_font.render('Menu', True, BLACK)
+                self.window.blit(self.menu_b, (self.menu_rect.x + 1, self.menu_rect.y + 10))
+
+        
+        pygame.display.update()
+        pygame.time.Clock().tick(60)
+
+
+    def run(self):
+        while True:
+            self.input()
+            self.update()
+            self.draw()
+
 
 
 
