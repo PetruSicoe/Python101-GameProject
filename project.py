@@ -23,8 +23,6 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
 GREEN = (0,255,0)
-BLUE = (0,0,255)
-COPPER = (72, 45, 20)
 LIGHT_YELLOW = (255, 255, 102)
 
 frame_rate = pygame.time.Clock()
@@ -41,9 +39,6 @@ class GameObject:
     def input(self):
         pass
 
-    def update(self):
-        pass
-
     def draw(self):
         pass
 
@@ -53,8 +48,6 @@ class Menu(GameObject):
         self.window = pygame.display.set_mode((MENU_WIDTH,MENU_HEIGHT))
         pygame.display.set_caption('Meniu Joc')
 
-
-        # pygame.draw.rect(screen,color_light,[width/2,height/2,140,40])
         #butoanele de accesare ale paginilor jocurilor
 
         self.color_hang = (203, 195, 227)
@@ -71,33 +64,22 @@ class Menu(GameObject):
         self.width_guess = 470
         self.heigth_guess = 120
 
-
-
         #[left, top, width, height]
         self.hang_rect = pygame.Rect(self.left_hang, self.top_hang, self.width_hang, self.heigth_hang)
         self.guess_rect = pygame.Rect(self.left_guess, self.top_guess, self.width_guess, self.heigth_guess)
-
-        self.hangman_rect = pygame.Rect(500, 400, 100, 80)
-        self.piatra_hartie_foarfeca_rect = pygame.Rect(400, 300, 100, 80)
-
-        self.color = pygame.Color('lightblue3')
 
 
     def input(self):
         for event in pygame.event.get():
             
-
-            #la deschiderea unei noi ferestre cea curenta se inchide
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse = pygame.mouse.get_pos()
                 if self.left_hang <= mouse[0] <= self.left_hang + self.width_hang and self.top_hang <= mouse[1] <= self.top_hang + self.heigth_hang:
-                    print("hello hangman")
                     hangman = Hangman()
                     hangman.run()
                     pygame.quit()
                     sys.exit()
                 elif self.left_guess <= mouse[0] <= self.left_guess + self.width_guess and self.top_guess <= mouse[1] <= self.top_guess + self.heigth_guess:
-                    print("hello guess")
                     guess = GuessTheNumber()
                     guess.run()
                     pygeme.quit()
@@ -111,12 +93,9 @@ class Menu(GameObject):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            
-    def update(self):
-        pass
+
 
     def draw(self):
-        #self.window.fill(back_ground)
        
         image_rect = back_ground.get_rect()
         self.window.fill(BLACK)
@@ -133,6 +112,7 @@ class Menu(GameObject):
         self.window.blit(self.img, (title_x_pos , title_y_pos ))
         
 
+        #draw de buton Hangman. Schimb culoarea daca e hover
         mouse = pygame.mouse.get_pos()
         if self.left_hang <= mouse[0] <= self.left_hang + self.width_hang and self.top_hang <= mouse[1] <= self.top_hang + self.heigth_hang:
             pygame.draw.rect(self.window, self.color_hang_hover, self.hang_rect)
@@ -143,6 +123,7 @@ class Menu(GameObject):
         self.hang_button = self.font.render('Hangman', True, BLACK)
         self.window.blit(self.hang_button, (self.left_hang + 15, self.top_hang + 20))
 
+        #draw de buton guess the number
         if self.left_guess <= mouse[0] <= self.left_guess + self.width_guess and self.top_guess <= mouse[1] <= self.top_guess + self.heigth_guess:
             pygame.draw.rect(self.window, self.color_guess_hover, self.guess_rect)
         else:
@@ -154,7 +135,6 @@ class Menu(GameObject):
 
 
         pygame.display.update()
-
         pygame.time.Clock().tick(60)
 
         
@@ -162,7 +142,6 @@ class Menu(GameObject):
     def run(self):
         while True:
             self.input()
-            self.update()
             self.draw()
 
 
@@ -173,18 +152,17 @@ class Hangman(GameObject):
 
         self.text = ''
         self.guess_text = ''
-
         self.current_letter = ''
         
-        
-        self.ultra_big_font = pygame.font.Font(None, 100)
-        
+        #fonturi
         self.input_font = pygame.font.SysFont('Comic Sans MS',100)
         self.letters_font = pygame.font.SysFont('Comic Sans MS',35)
         self.title_font = pygame.font.SysFont('Algerian',100)
-     
-
+        
+        #imagine background
         self.hang_background = pygame.image.load("papyrus.jpg")
+
+        #import de imagini care arata stadiul in functie de numarul de vieti
         self.zero_img = pygame.image.load("0.jpg")
         self.zero_img = pygame.transform.scale(self.zero_img, (self.zero_img.get_size()[0] + 100, self.zero_img.get_size()[1] + 100))
 
@@ -210,10 +188,11 @@ class Hangman(GameObject):
         self.ten_img = pygame.transform.scale(self.ten_img, (self.ten_img.get_size()[0] + 100, self.ten_img.get_size()[1] + 100))
 
 
-
+        #loc unde pun litera curenta
         self.input_box = pygame.Rect(100, 400, 200, 200)
         self.active_box = False
 
+        #culori pt input box
         self.color_inactive = (64, 64, 64)
         self.color_active = (224, 224, 224)
 
@@ -223,7 +202,7 @@ class Hangman(GameObject):
         self.lost = False
         self.timer_index = 0
 
-        # cuvantul este citit dintr-un fisier unde se afla cuvinte pe prima linie separate prin spatii albe
+        #fisier cu cuvintele de ghicit. Aleg unul random dintre ele
         with open("hangman_input.txt") as file:
             lines = file.readlines()
 
@@ -233,17 +212,12 @@ class Hangman(GameObject):
         self.guess_text = words[randrange(len(words))]
         print("de ghicit: " + self.guess_text)
 
-        #lista de tupluri (litera, casuta litera, ne/ghicit)
+        #fac o lista de tupluri cu litera, spatiul ei dedicat si daca e ghicita sau nu
         self.letters= []
 
         for i in range(len(self.guess_text)):
             self.letters.append( (self.guess_text[i], pygame.Rect(10 + 100 * i, 200, 50 , 50), False) )
 
-    
-       
-        #putem sa ghicim atata timp cat nu am completat spanzuratoarea
-        self.active = True
-        self.count = 0
 
         #Menu Button
         self.color_menu = (203, 195, 227)
@@ -265,21 +239,23 @@ class Hangman(GameObject):
                 pygame.quit()
                 sys.exit()
 
-            #prin escape revenim la pagina anterioara (de menu)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     menu = Menu()
                     menu.run()
                     pygame.quit()
                     sys.exit()
+                #putem modifica ceva din input box, daca este selectata
                 if self.active_box:
                     if event.key == pygame.K_RETURN:
+                        #la enter procesez litera din input box
                         if len(self.text) > 0:
                             if self.text in self.guess_text:
                                 pos = self.guess_text.find(self.text)
                                 while pos != -1:
                                     self.letters[pos] = (self.letters[pos][0], self.letters[pos][1], True)
                                     pos = self.guess_text.find(self.text, pos + 1, len(self.guess_text))
+                                #verific daca toate casutele sunt completate. Daca sunt, am castigat
                                 just_won = True
                                 for k in self.letters:
                                     if not k[2]:
@@ -290,12 +266,12 @@ class Hangman(GameObject):
                                 self.nr_lives -= 1
                                 if self.nr_lives == 0:
                                     self.lost = True
-                            print(self.text)
                         self.text = ''
                     elif event.key == pygame.K_BACKSPACE:
                         self.text = self.text[:-1]
                     else:
                         self.current_letter = event.unicode.upper()
+                        #doar o litera trebuie sa fie in casuta
                         if len(self.text) >= 1:
                             self.text = self.text[:-1]
                         self.text += self.current_letter
@@ -303,7 +279,7 @@ class Hangman(GameObject):
                         
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.input_box.collidepoint(event.pos):
-                    # Toggle the active variable.
+                    #fac toggle
                     self.active_box = not self.active_box
                 else:
                     self.active_box = False
@@ -316,11 +292,6 @@ class Hangman(GameObject):
                     
 
 
-                
-
-
-    def update(self):
-        pass
 
     def draw(self):
 
@@ -331,6 +302,7 @@ class Hangman(GameObject):
         self.window.fill(BLACK)
         self.window.blit(self.hang_background, image_rect)
         
+        #desenex imaginea ce reprezinta starea + numarul de vieti
         if self.nr_lives == 6:
             image_rect = self.zero_img.get_rect()
             hang_img = self.zero_img
@@ -365,6 +337,7 @@ class Hangman(GameObject):
         self.window.blit(self.title, (title_x_pos , title_y_pos ))
 
         if not self.won and not self.lost:
+            #literele ghicite/neghicite
             for i in range(len(self.letters)):
                 pygame.draw.rect(self.window, self.color_inactive, self.letters[i][1])
                 text_surface = self.letters_font.render(self.letters[i][0],True, self.color_active)
@@ -381,12 +354,15 @@ class Hangman(GameObject):
                     self.window.blit(text_surface, (self.input_box.x + 65, self.input_box.y + 20))
 
 
+        #caz daca am castigat
         if self.won:
+            #afisez mesaj
             if self.timer_index < 1:
                 self.timer_index += 0.01
                 text_surface = self.title_font.render("You win", True, GREEN)
                 self.window.blit(text_surface, (400, 400))
             else:
+                #pun buton meniu dupa ce expira timpul
                 mouse = pygame.mouse.get_pos()
                 if self.left_menu <= mouse[0] <= self.left_menu + self.width_menu and self.top_menu <= mouse[1] <= self.top_menu + self.heigth_menu:
                     pygame.draw.rect(self.window, self.color_menu_hover, self.menu_rect)
@@ -396,12 +372,15 @@ class Hangman(GameObject):
                 self.menu_button = self.letters_font.render('Back to Menu', True, self.color_inactive)
                 self.window.blit(self.menu_button, (self.left_menu + 30, self.top_menu + 30))
 
+        #caz daca am pierdut
         if self.lost:
+            #afisez mesaj
             if self.timer_index < 1:
                 self.timer_index += 0.01
                 text_surface = self.title_font.render("You lost", True, RED)
                 self.window.blit(text_surface, (400, 400))
             else:
+                #pun buton meniu dupa ce expira timpul
                 mouse = pygame.mouse.get_pos()
                 if self.left_menu <= mouse[0] <= self.left_menu + self.width_menu and self.top_menu <= mouse[1] <= self.top_menu + self.heigth_menu:
                     pygame.draw.rect(self.window, self.color_menu_hover, self.menu_rect)
@@ -419,8 +398,8 @@ class Hangman(GameObject):
     def run(self):
         while True:
             self.input()
-            self.update()
             self.draw()
+
 
 class GuessTheNumber(GameObject):
     def __init__(self):
@@ -553,10 +532,6 @@ class GuessTheNumber(GameObject):
                     pygame.quit()
                     sys.exit()
                     
-    
-    
-    def update(self):
-        pass
 
     def draw(self):
 
@@ -674,7 +649,6 @@ class GuessTheNumber(GameObject):
     def run(self):
         while True:
             self.input()
-            self.update()
             self.draw()
 
 
